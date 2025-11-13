@@ -1,196 +1,274 @@
-# 🧠 EnvDeepFake
+# 🔊 EnvDeepFake: Audio Deepfake Detection via Dual-Stream Fusion
 
-**EnvDeepFake** is a deep learning framework designed for detecting **Deep Video Frame Interpolation (VFI)** in environmental or “in-the-wild” video scenarios.  
-It provides an end-to-end pipeline — from preprocessing to model training and testing — for identifying interpolated (fake) frames in videos.
+**EnvDeepFake** is a deep learning–based framework for detecting **audio deepfakes** using a **dual-stream neural architecture**.  
+The system jointly processes **raw audio waveforms** and **Mel-spectrograms** to detect speech forgeries, focusing on artifacts introduced by **voice cloning**, **speech synthesis**, or **frame interpolation** in compressed audio.
+
+
 
 ---
 
-## 📚 Table of Contents
-- [Background](#background)
-- [Features](#features)
-- [Repository Structure](#repository-structure)
-- [Installation](#installation)
-- [Usage](#usage)
+## 📘 Table of Contents
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Repository Structure](#-repository-structure)
+- [System Description](#-system-description)
+- [Installation](#-installation)
+- [Usage](#-usage)
   - [1. Preprocessing](#1-preprocessing)
   - [2. Training](#2-training)
-  - [3. Testing / Evaluation](#3-testing--evaluation)
-- [Configuration & Hyperparameters](#configuration--hyperparameters)
-- [Dataset](#dataset)
-- [Results](#results)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+  - [3. Evaluation / Testing](#3-evaluation--testing)
+- [Configuration](#-configuration)
+- [Results](#-results)
+- [Complexity](#-complexity)
+- [Submission Info](#-submission-info)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
 
 ---
 
-## 🧩 Background
+## 🧠 Overview
 
-**Video Frame Interpolation (VFI)** techniques generate intermediate frames between real frames to make videos smoother.  
-While useful in video editing or frame rate conversion, these methods can also be misused for **video forgeries** — making fake content appear more realistic.
+The **EnvDeepFake Audio** system detects manipulated or generated audio using a **dual-stream CNN + Transformer** architecture:
 
-**EnvDeepFake** addresses this by detecting VFI-based manipulations using a deep neural network trained to identify interpolation artifacts even in environmental conditions (e.g., varying lighting, motion blur, compression).
+* **Raw-Waveform Stream** → Uses a pretrained **Wav2Vec2 encoder** followed by a **Conformer** for temporal context.
+* **Mel-Spectrogram Stream** → Uses a **Swin-Tiny Transformer** backbone with **Graph Attention (GATv2)** pooling.
+* **Fusion** → The two embeddings are fused into a joint representation and classified using an **OC-Softmax** head for binary detection.
+
+This design captures both **fine-grained waveform irregularities** and **spectral texture inconsistencies** introduced during synthetic generation or frame interpolation.
 
 ---
 
-## 🚀 Features
+## ⚙️ Key Features
 
-- 🔹 **Preprocessing tools** for interpolated and natural videos (`preprocess_env.py`)
-- 🔹 **Custom CNN architecture** for deepfake/interpolation detection (`model.py`)
-- 🔹 **Training and evaluation scripts** (`train.py`, `test.py`)
-- 🔹 **Utility functions** for logging, metrics, and reproducibility (`utils.py`, `logger.py`)
-- 🔹 **Submission-ready output** (`submission.txt`)
-- 🔹 Modular and extensible — easy to adapt to new datasets or models
+* 🎧 **Dual-Stream Input:** Combines raw waveform and Mel-spectrogram features.
+* 🧩 **Fusion Architecture:** Joint representation learning for enhanced detection.
+* 🧠 **Pretrained Backbones:** Utilizes Wav2Vec2 and Swin-Tiny for efficient feature extraction.
+* 🔁 **Audio Augmentation:** Noise addition, pitch shift, time-stretch, random gain.
+* 📊 **Metrics:** Computes EER, AUC, Accuracy, Precision, Recall, F1.
+* 💾 **Reproducible Pipeline:** Includes training, testing, and logging utilities.
 
 ---
 
 ## 🗂️ Repository Structure
 
+```text
 EnvDeepFake/
 │
-├── train.py # Model training entry point
-├── test.py # Evaluation / inference script
-├── preprocess_env.py # Preprocessing of environmental/interpolated videos
-├── model.py # CNN architecture definition
-├── utils.py # Utility functions (data loaders, metrics, etc.)
-├── logger.py # Logging and experiment tracking
-├── submission.txt # Example or template submission file
-└── requirements.txt # Dependencies (PyTorch, OpenCV, NumPy, etc.)
+├── train.py           # Model training entry point
+├── test.py            # Evaluation / inference script
+├── preprocess_env.py  # Audio preprocessing & feature extraction
+├── model.py           # Dual-stream CNN/Transformer model definition
+├── utils.py           # Utility functions (metrics, loaders, EER computation)
+├── logger.py          # Logging and experiment tracking
+├── submission.txt     # Sample submission file
+├── requirements.txt   # Dependencies (PyTorch, torchaudio, etc.)
+└── README.md          # Project documentation
+
+
+## Here is the complete, formatted Markdown code. You can copy the content inside the code block below and paste it directly into your README.md file on GitHub.
+
+Markdown
+
+# 🔊 EnvDeepFake: Audio Deepfake Detection via Dual-Stream Fusion
+
+**EnvDeepFake** is a deep learning–based framework for detecting **audio deepfakes** using a **dual-stream neural architecture**.  
+The system jointly processes **raw audio waveforms** and **Mel-spectrograms** to detect speech forgeries, focusing on artifacts introduced by **voice cloning**, **speech synthesis**, or **frame interpolation** in compressed audio.
+
 
 
 ---
 
-## ⚙️ Installation
+## 📘 Table of Contents
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Repository Structure](#-repository-structure)
+- [System Description](#-system-description)
+- [Installation](#-installation)
+- [Usage](#-usage)
+  - [1. Preprocessing](#1-preprocessing)
+  - [2. Training](#2-training)
+  - [3. Evaluation / Testing](#3-evaluation--testing)
+- [Configuration](#-configuration)
+- [Results](#-results)
+- [Complexity](#-complexity)
+- [Submission Info](#-submission-info)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
 
-### Step 1: Clone the repository
-```bash
-git clone https://github.com/Sarthak-Shaurya/EnvDeepFake.git
+---
+
+## 🧠 Overview
+
+The **EnvDeepFake Audio** system detects manipulated or generated audio using a **dual-stream CNN + Transformer** architecture:
+
+* **Raw-Waveform Stream** → Uses a pretrained **Wav2Vec2 encoder** followed by a **Conformer** for temporal context.
+* **Mel-Spectrogram Stream** → Uses a **Swin-Tiny Transformer** backbone with **Graph Attention (GATv2)** pooling.
+* **Fusion** → The two embeddings are fused into a joint representation and classified using an **OC-Softmax** head for binary detection.
+
+This design captures both **fine-grained waveform irregularities** and **spectral texture inconsistencies** introduced during synthetic generation or frame interpolation.
+
+---
+
+## ⚙️ Key Features
+
+* 🎧 **Dual-Stream Input:** Combines raw waveform and Mel-spectrogram features.
+* 🧩 **Fusion Architecture:** Joint representation learning for enhanced detection.
+* 🧠 **Pretrained Backbones:** Utilizes Wav2Vec2 and Swin-Tiny for efficient feature extraction.
+* 🔁 **Audio Augmentation:** Noise addition, pitch shift, time-stretch, random gain.
+* 📊 **Metrics:** Computes EER, AUC, Accuracy, Precision, Recall, F1.
+* 💾 **Reproducible Pipeline:** Includes training, testing, and logging utilities.
+
+---
+
+## 🗂️ Repository Structure
+
+```text
+EnvDeepFake/
+│
+├── train.py           # Model training entry point
+├── test.py            # Evaluation / inference script
+├── preprocess_env.py  # Audio preprocessing & feature extraction
+├── model.py           # Dual-stream CNN/Transformer model definition
+├── utils.py           # Utility functions (metrics, loaders, EER computation)
+├── logger.py          # Logging and experiment tracking
+├── submission.txt     # Sample submission file
+├── requirements.txt   # Dependencies (PyTorch, torchaudio, etc.)
+└── README.md          # Project documentation
+
+## 🧩 System Description
+
+Component,Description
+Sampling Rate,16 kHz
+Input Features,Raw audio waveform + log-Mel spectrogram
+Model,Dual-Stream (Wav2Vec2 + Swin-Tiny + GAT)
+Loss Function,OC-Softmax (margin-based cosine loss)
+Augmentations,"Gaussian noise, time-stretch, pitch-shift, gain variation"
+Metrics,"EER, AUC, Accuracy, Precision, Recall, F1-score"
+GPU Used,NVIDIA RTX A4000 (16 GB VRAM)
+Parameters,~128 Million
+
+
+Here is the complete, formatted Markdown code. You can copy the content inside the code block below and paste it directly into your README.md file on GitHub.Markdown# 🔊 EnvDeepFake: Audio Deepfake Detection via Dual-Stream Fusion
+
+**EnvDeepFake** is a deep learning–based framework for detecting **audio deepfakes** using a **dual-stream neural architecture**.  
+The system jointly processes **raw audio waveforms** and **Mel-spectrograms** to detect speech forgeries, focusing on artifacts introduced by **voice cloning**, **speech synthesis**, or **frame interpolation** in compressed audio.
+
+
+
+---
+
+## 📘 Table of Contents
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Repository Structure](#-repository-structure)
+- [System Description](#-system-description)
+- [Installation](#-installation)
+- [Usage](#-usage)
+  - [1. Preprocessing](#1-preprocessing)
+  - [2. Training](#2-training)
+  - [3. Evaluation / Testing](#3-evaluation--testing)
+- [Configuration](#-configuration)
+- [Results](#-results)
+- [Complexity](#-complexity)
+- [Submission Info](#-submission-info)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
+
+---
+
+## 🧠 Overview
+
+The **EnvDeepFake Audio** system detects manipulated or generated audio using a **dual-stream CNN + Transformer** architecture:
+
+* **Raw-Waveform Stream** → Uses a pretrained **Wav2Vec2 encoder** followed by a **Conformer** for temporal context.
+* **Mel-Spectrogram Stream** → Uses a **Swin-Tiny Transformer** backbone with **Graph Attention (GATv2)** pooling.
+* **Fusion** → The two embeddings are fused into a joint representation and classified using an **OC-Softmax** head for binary detection.
+
+This design captures both **fine-grained waveform irregularities** and **spectral texture inconsistencies** introduced during synthetic generation or frame interpolation.
+
+---
+
+## ⚙️ Key Features
+
+* 🎧 **Dual-Stream Input:** Combines raw waveform and Mel-spectrogram features.
+* 🧩 **Fusion Architecture:** Joint representation learning for enhanced detection.
+* 🧠 **Pretrained Backbones:** Utilizes Wav2Vec2 and Swin-Tiny for efficient feature extraction.
+* 🔁 **Audio Augmentation:** Noise addition, pitch shift, time-stretch, random gain.
+* 📊 **Metrics:** Computes EER, AUC, Accuracy, Precision, Recall, F1.
+* 💾 **Reproducible Pipeline:** Includes training, testing, and logging utilities.
+
+---
+
+## 🗂️ Repository Structure
+
+```text
+EnvDeepFake/
+│
+├── train.py           # Model training entry point
+├── test.py            # Evaluation / inference script
+├── preprocess_env.py  # Audio preprocessing & feature extraction
+├── model.py           # Dual-stream CNN/Transformer model definition
+├── utils.py           # Utility functions (metrics, loaders, EER computation)
+├── logger.py          # Logging and experiment tracking
+├── submission.txt     # Sample submission file
+├── requirements.txt   # Dependencies (PyTorch, torchaudio, etc.)
+└── README.md          # Project documentation
+## 🧩 System DescriptionComponentDescriptionSamplin
+
+Component,Description
+Sampling Rate,16 kHz
+Input Features,Raw audio waveform + log-Mel spectrogram
+Model,Dual-Stream (Wav2Vec2 + Swin-Tiny + GAT)
+Loss Function,OC-Softmax (margin-based cosine loss)
+Augmentations,"Gaussian noise, time-stretch, pitch-shift, gain variation"
+Metrics,"EER, AUC, Accuracy, Precision, Recall, F1-score"
+GPU Used,NVIDIA RTX A4000 (16 GB VRAM)
+Parameters,~128 Million
+
+
+
+##⚙️ InstallationStep 
+
+Step 1: Clone the repositoryBashgit clone [https://github.com/Sarthak-Shaurya/EnvDeepFake.git](https://github.com/Sarthak-Shaurya/EnvDeepFake.git)
 cd EnvDeepFake
+Step 2: Create and activate a virtual environmentBashpython -m venv venv
 
-Step 2: Create and activate a virtual environment (optional)
-python -m venv venv
 # On Windows
 venv\Scripts\activate
+
 # On macOS/Linux
 source venv/bin/activate
 
-Step 3: Install dependencies
-pip install -r requirements.txt
 
-
-💡 If no requirements.txt exists, create one including packages like:
-torch, torchvision, numpy, opencv-python, tqdm, matplotlib, scikit-learn, pandas, librosa.
-
-🧪 Usage
-1️⃣ Preprocessing
-
-Prepare your dataset of interpolated and real videos:
-
-python preprocess_env.py \
-  --input_dir path/to/raw_videos \
+Step 3: Install dependenciesBashpip install -r requirements.txt
+💡 Note: Typical requirements include torch, torchaudio, timm, torch_geometric, numpy, librosa, scikit-learn, tqdm, and matplotlib.🧪 Usage1. PreprocessingExtract waveform and Mel-spectrogram features for all audio files.Bashpython preprocess_env.py \
+  --input_dir path/to/raw_audio \
   --output_dir path/to/processed_data \
-  --frame_rate 30
-
-
-This script extracts and formats data for training and testing.
-
-2️⃣ Training
-
-Train your model using the preprocessed dataset:
-
-python train.py \
+  --sample_rate 16000
+This script will normalize audio, extract Mel-spectrograms, and save tensors for model training.2. TrainingTrain the model using preprocessed features.Bashpython train.py \
   --data_dir path/to/processed_data \
   --epochs 50 \
-  --batch_size 32 \
-  --lr 0.001 \
+  --batch_size 16 \
+  --lr 1e-4 \
   --save_dir checkpoints/
-
-
-Model checkpoints and training logs will be saved automatically.
-
-3️⃣ Testing / Evaluation
-
-Evaluate the trained model on test data:
-
-python test.py \
+During training, the logger saves loss curves and metrics. The best checkpoint (based on validation EER) is saved automatically.3. Evaluation / TestingEvaluate your model on a test set.Bashpython test.py \
   --checkpoint checkpoints/model_best.pth \
   --test_data path/to/test_data \
-  --output submission.txt
+  --output results.txt
+Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission file compatible with leaderboard formats.
 
 
-This computes detection metrics (accuracy, F1, ROC-AUC, etc.) and outputs predictions in a standardized format.
+##Configuration
 
-⚙️ Configuration & Hyperparameters
-
-You can modify hyperparameters through command-line arguments or a configuration file.
-
-Parameter	Description	Default
---epochs	Number of training epochs	50
---batch_size	Mini-batch size	32
---lr	Learning rate	0.001
---data_dir	Directory for input data	./data
---save_dir	Directory for saving checkpoints	./checkpoints
-🎥 Dataset
-
-The dataset should contain real and interpolated (fake) video samples.
-Example structure:
-
-data/
-├── train/
-│   ├── real/
-│   └── fake/
-└── test/
-    ├── real/
-    └── fake/
+Parameter,Description,Default
+--epochs,Number of training epochs,50
+--batch_size,Batch size,16
+--lr,Learning rate,1e-4
+--sample_rate,Audio sample rate,16000
+--save_dir,Checkpoint save path,./checkpoints
 
 
-Each folder should contain frames or clips extracted via preprocess_env.py.
 
-⚠️ Ensure that interpolated videos are properly labeled to enable supervised training.
-
-📊 Results
-
-(Add your experimental results here once available.)
-For example:
-
-Metric	Accuracy	Precision	Recall	F1-score
-Baseline CNN	89.3%	88.7%	90.1%	89.4%
-Proposed Model	94.1%	93.8%	94.5%	94.1%
-
-Add visualizations such as ROC curves or confusion matrices for clarity.
-
-🤝 Contributing
-
-Contributions are welcome!
-
-Fork the repository
-
-Create your feature branch:
-
-git checkout -b feature/YourFeature
-
-
-Commit your changes:
-
-git commit -m "Add new feature"
-
-
-Push to the branch:
-
-git push origin feature/YourFeature
-
-
-Open a Pull Request
-
-🪪 License
-
-This project is licensed under the MIT License.
-See the LICENSE
- file for details.
-
-📬 Contact
-
-Author: Sarthak Shaurya
-
-📘 GitHub: github.com/Sarthak-Shaurya/EnvDeepFake
-
-✉️ Email: (optional — add if you’d like to share contact info)
