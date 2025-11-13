@@ -64,7 +64,7 @@ EnvDeepFake/
 ├── submission.txt     # Sample submission file
 ├── requirements.txt   # Dependencies (PyTorch, torchaudio, etc.)
 └── README.md          # Project documentation
-
+```
 
 ## 🧩 System Description
 
@@ -78,91 +78,14 @@ Metrics,"EER, AUC, Accuracy, Precision, Recall, F1-score"
 GPU Used,NVIDIA RTX A4000 (16 GB VRAM)
 Parameters,~128 Million
 
-
-Here is the complete, formatted Markdown code. You can copy the content inside the code block below and paste it directly into your README.md file on GitHub.Markdown# 🔊 EnvDeepFake: Audio Deepfake Detection via Dual-Stream Fusion
-
-**EnvDeepFake** is a deep learning–based framework for detecting **audio deepfakes** using a **dual-stream neural architecture**.  
-The system jointly processes **raw audio waveforms** and **Mel-spectrograms** to detect speech forgeries, focusing on artifacts introduced by **voice cloning**, **speech synthesis**, or **frame interpolation** in compressed audio.
-
-
-
 ---
 
-## 📘 Table of Contents
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Repository Structure](#-repository-structure)
-- [System Description](#-system-description)
-- [Installation](#-installation)
-- [Usage](#-usage)
-  - [1. Preprocessing](#1-preprocessing)
-  - [2. Training](#2-training)
-  - [3. Evaluation / Testing](#3-evaluation--testing)
-- [Configuration](#-configuration)
-- [Results](#-results)
-- [Complexity](#-complexity)
-- [Submission Info](#-submission-info)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
 
----
-
-## 🧠 Overview
-
-The **EnvDeepFake Audio** system detects manipulated or generated audio using a **dual-stream CNN + Transformer** architecture:
-
-* **Raw-Waveform Stream** → Uses a pretrained **Wav2Vec2 encoder** followed by a **Conformer** for temporal context.
-* **Mel-Spectrogram Stream** → Uses a **Swin-Tiny Transformer** backbone with **Graph Attention (GATv2)** pooling.
-* **Fusion** → The two embeddings are fused into a joint representation and classified using an **OC-Softmax** head for binary detection.
-
-This design captures both **fine-grained waveform irregularities** and **spectral texture inconsistencies** introduced during synthetic generation or frame interpolation.
-
----
-
-## ⚙️ Key Features
-
-* 🎧 **Dual-Stream Input:** Combines raw waveform and Mel-spectrogram features.
-* 🧩 **Fusion Architecture:** Joint representation learning for enhanced detection.
-* 🧠 **Pretrained Backbones:** Utilizes Wav2Vec2 and Swin-Tiny for efficient feature extraction.
-* 🔁 **Audio Augmentation:** Noise addition, pitch shift, time-stretch, random gain.
-* 📊 **Metrics:** Computes EER, AUC, Accuracy, Precision, Recall, F1.
-* 💾 **Reproducible Pipeline:** Includes training, testing, and logging utilities.
-
----
-
-## 🗂️ Repository Structure
-
-```text
-EnvDeepFake/
-│
-├── train.py           # Model training entry point
-├── test.py            # Evaluation / inference script
-├── preprocess_env.py  # Audio preprocessing & feature extraction
-├── model.py           # Dual-stream CNN/Transformer model definition
-├── utils.py           # Utility functions (metrics, loaders, EER computation)
-├── logger.py          # Logging and experiment tracking
-├── submission.txt     # Sample submission file
-├── requirements.txt   # Dependencies (PyTorch, torchaudio, etc.)
-└── README.md          # Project documentation
-## 🧩 System DescriptionComponentDescriptionSamplin
-
-Component,Description
-Sampling Rate,16 kHz
-Input Features,Raw audio waveform + log-Mel spectrogram
-Model,Dual-Stream (Wav2Vec2 + Swin-Tiny + GAT)
-Loss Function,OC-Softmax (margin-based cosine loss)
-Augmentations,"Gaussian noise, time-stretch, pitch-shift, gain variation"
-Metrics,"EER, AUC, Accuracy, Precision, Recall, F1-score"
-GPU Used,NVIDIA RTX A4000 (16 GB VRAM)
-Parameters,~128 Million
-
-
-
-##⚙️ InstallationStep 
+## ⚙️ InstallationStep 
 
 Step 1: Clone the repositoryBashgit clone [https://github.com/Sarthak-Shaurya/EnvDeepFake.git](https://github.com/Sarthak-Shaurya/EnvDeepFake.git)
 cd EnvDeepFake
+
 Step 2: Create and activate a virtual environmentBashpython -m venv venv
 
 # On Windows
@@ -189,8 +112,8 @@ During training, the logger saves loss curves and metrics. The best checkpoint (
   --output results.txt
 Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission file compatible with leaderboard formats.
 
-
-##Configuration
+---
+## Configuration
 
 Parameter,Description,Default
 --epochs,Number of training epochs,50
