@@ -109,9 +109,9 @@ Extract waveform and Mel-spectrogram features for all audio files.
 
 ```bash
 
-python preprocess_env.py \
-  --input_dir path/to/raw_audio \
-  --output_dir path/to/processed_data \
+python preprocess_env.py 
+  --input_dir path/to/raw_audio 
+  --output_dir path/to/processed_data 
   --sample_rate 16000
   ```
 This script will normalize audio, extract Mel-spectrograms, and save tensors for model training.
@@ -121,12 +121,12 @@ Train the model using preprocessed features.
 
 Bash
 ```
-python train.py \
-  --data_dir path/to/processed_data \
-  --epochs 50 \
-  --batch_size 16 \
-  --lr 1e-4 \
-  --save_dir checkpoints/
+python train.py 
+  --data_dir path/to/processed_data 
+  --epochs 50 
+  --batch_size 16 
+  --lr 1e-4 
+  --save_dir checkpoints
   ```
 During training, the logger saves loss curves and metrics. The best checkpoint (based on validation EER) is saved automatically.
 
@@ -135,9 +135,9 @@ Evaluate your model on a test set.
 
 Bash
 ```
-python test.py \
-  --checkpoint checkpoints/model_best.pth \
-  --test_data path/to/test_data \
+python test.py 
+  --checkpoint checkpoints/model_best.pth 
+  --test_data path/to/test_data 
   --output results.txt
 
 
