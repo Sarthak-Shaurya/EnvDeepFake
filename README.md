@@ -100,7 +100,7 @@ pip install -r requirements.txt
 💡 Note: Typical requirements include torch, torchaudio, timm, torch_geometric, numpy, librosa, scikit-learn, tqdm, and matplotlib.
 
 🧪 Usage
-1. Preprocessing
+1. Preprocessing \
 Extract waveform and Mel-spectrogram features for all audio files.
 
 ```bash
