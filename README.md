@@ -83,7 +83,11 @@ Step 1: Clone the repository
 git clone [https://github.com/Sarthak-Shaurya/EnvDeepFake.git](https://github.com/Sarthak-Shaurya/EnvDeepFake.git)
 cd EnvDeepFake
 ```
-Step 2: Create and activate a virtual environmentBashpython -m venv venv
+Step 2: Create and activate a virtual environment
+
+```bash
+python -m venv venv
+```
 
 <b> On Windows </b>
 venv\Scripts\activate
@@ -112,7 +116,7 @@ python preprocess_env.py \
   ```
 This script will normalize audio, extract Mel-spectrograms, and save tensors for model training.
 
-2. Training
+2. Training\
 Train the model using preprocessed features.
 
 Bash
@@ -126,7 +130,7 @@ python train.py \
   ```
 During training, the logger saves loss curves and metrics. The best checkpoint (based on validation EER) is saved automatically.
 
-3. Evaluation / Testing
+3. Evaluation / Testing\
 Evaluate your model on a test set.
 
 Bash
@@ -150,6 +154,13 @@ Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission fil
 | `sample_rate`    | Audio sample rate           | 16000            |
 | `save_dir`       | Checkpoint save path        | `./checkpoints`  |
 
+## 👨‍💻 Authors
+
+| **Name** | **Email** | **Affiliation** | **Role** |
+|-----------|------------|-----------------|-----------|
+| **Athar Ali** | [athar_a@ece.iitr.ac.in](mailto:athar_a@ece.iitr.ac.in) | Indian Institute of Technology Roorkee, Dept. of Electronics and Communication Engineering, Roorkee, Uttarakhand, India | 📨 Corresponding Author |
+| **Jwalit Pandit** | [pandit_jt@ece.iitr.ac.in](mailto:pandit_jt@ece.iitr.ac.in) | Indian Institute of Technology Roorkee, Dept. of Electronics and Communication Engineering, Roorkee, Uttarakhand, India | — |
+| **Sarthak Shaurya** | [sarthak_s@ece.iitr.ac.in](mailto:sarthak_s@ece.iitr.ac.in) | Indian Institute of Technology Roorkee, Dept. of Electronics and Communication Engineering, Roorkee, Uttarakhand, India | — |
 
 
 
