@@ -1,0 +1,219 @@
+import os
+import json
+import torch
+import torchaudio
+from pathlib import Path
+from tqdm import tqdm
+import argparse
+import multiprocessing
+import sys
+import warnings
+import numpy as np
+import librosa # Using librosa for robust WAV reading fallback
+
+# --- PARAMETERS (MODIFIED to match preprocess_env.py and utils.py) ---
+SR = 16000
+N_FFT = 1024
+HOP_LENGTH = 160 # 10ms hop @ 16kHz
+N_MELS = 128
+# F_MAX removed to match preprocess_env.py
+
+# --- Mel Spectrogram Transformer (from preprocess_env.py) ---
+mel_transformer = torchaudio.transforms.MelSpectrogram(
+    sample_rate=SR, n_fft=N_FFT, n_mels=N_MELS, hop_length=HOP_LENGTH
+)
+amplitude_to_db = torchaudio.transforms.AmplitudeToDB()
+
+# --------------------------------------------------------------------------------
+# --- Worker function (MODIFIED to match preprocess_env.py logic) ---
+# --------------------------------------------------------------------------------
+
+def process_single_file(args):
+    """
+    Worker function to process a single audio file for the test set.
+    Matches the logic of preprocess_env.py.
+    """
+    audio_path_str, output_root_str, split_name, dataset_root_str = args
+    
+    audio_path = Path(audio_path_str)
+    dataset_root = Path(dataset_root_str)
+    output_dir_root = Path(output_root_str)
+    
+    try:
+        file_id = audio_path.stem
+        label_val = -1  # Dummy label for the test set
+    
+        # --- Path logic from preprocess_env.py ---
+        audio_rel_path = str(audio_path.relative_to(dataset_root))
+        spec_filename = f"{file_id}.pt"
+        
+        # Get the directory structure, e.g., "test/audio"
+        spec_rel_dir = str(Path(audio_rel_path).parent) 
+        
+        # Save to output_dir_root / "log_specs" / test / audio / file.pt
+        spec_save_dir = output_dir_root / "log_specs" / spec_rel_dir
+        spec_save_dir.mkdir(parents=True, exist_ok=True)
+        spec_save_path = spec_save_dir / spec_filename
+        
+        # Path to the saved spectrogram, relative to the output_dir_root
+        spec_rel_path = str(spec_save_path.relative_to(output_dir_root))
+        # Path to the original audio, relative to the dataset_root
+        audio_rel_path_for_json = str(audio_path.relative_to(dataset_root))
+
+        if spec_save_path.exists():
+            if spec_save_path.stat().st_size > 0:
+                # Return in the list format expected by AudioLogSpecDataset
+                return (True, [audio_rel_path_for_json, spec_rel_path, label_val], None)
+            else:
+                spec_save_path.unlink() # Delete 0-byte file
+
+        # --- Load Audio (Logic from preprocess_env.py) ---
+        waveform, sample_rate = None, None
+        librosa_fallback_used = False
+        try:
+            waveform, sample_rate = torchaudio.load(audio_path)
+        except Exception as e:
+            error_str = str(e).lower()
+            if "flac" in error_str or "backend" in error_str or "unknown" in error_str or "mp3" in error_str or "system error" in error_str or "wav" in error_str:
+                try:
+                    waveform_np, sample_rate = librosa.load(str(audio_path), sr=SR, mono=True)
+                    waveform = torch.from_numpy(waveform_np).unsqueeze(0)
+                    librosa_fallback_used = True
+                except Exception as librosa_e:
+                    error_msg = f"Warning: Librosa ALSO failed for {audio_path}. Skipping. Error: {librosa_e}"
+                    print(error_msg, flush=True)
+                    return (False, None, error_msg)
+            else:
+                error_msg = f"Warning: Unexpected torchaudio error loading {audio_path}. Skipping. Error: {e}"
+                print(error_msg, flush=True)
+                return (False, None, error_msg)
+
+        if waveform is None:
+            error_msg = f"Warning: Waveform for {audio_path} is None after load attempts. Skipping."
+            print(error_msg, flush=True)
+            return (False, None, error_msg)
+
+        # --- Resample & Mono (Logic from preprocess_env.py) ---
+        if not librosa_fallback_used:
+            if sample_rate != SR:
+                waveform = torchaudio.functional.resample(waveform, orig_freq=sample_rate, new_freq=SR)
+            if waveform.shape[0] > 1:
+                waveform = torch.mean(waveform, dim=0, keepdim=True)
+        
+        # --- Create and Save Log-Spectrogram (Logic from preprocess_env.py) ---
+        with torch.no_grad():
+            spec = mel_transformer(waveform.to("cpu")) 
+            log_spec = amplitude_to_db(spec)
+            
+            # --- REMOVED [0, 1] normalization ---
+            # This was the other major mismatch.
+            
+            torch.save(log_spec.squeeze(0).cpu(), spec_save_path)
+            
+        # Return in the list format expected by AudioLogSpecDataset
+        return (True, [audio_rel_path_for_json, spec_rel_path, label_val], None)
+
+    except Exception as e:
+        error_msg = f"Skipping {audio_path} due to: {e}"
+        if "memory" in str(e).lower():
+             print(f"\n[!!! CRITICAL MEMORY ERROR !!!] {error_msg}", file=sys.stderr, flush=True)
+        else:
+             print(f"\n[Worker Error] {error_msg}", file=sys.stderr, flush=True)
+        return (False, None, error_msg)
+
+# --------------------------------------------------------------------------------
+# --- Processing Function (MODIFIED to match new worker) ---
+# --------------------------------------------------------------------------------
+
+def process_test_files(audio_files_list, output_root, split_name, num_workers, dataset_root):
+    print(f"\n--- Processing partition: {split_name.upper()} ---")
+    
+    # JSON file will be saved as "test_env.json" in the output_root
+    output_json_path = output_root / f"{split_name}_env.json"
+    
+    # Spectrograms will be saved in output_root / "log_specs" / ...
+    output_mel_dir = output_root / "log_specs"
+    output_mel_dir.mkdir(exist_ok=True)
+    
+    worker_args = [
+        (str(audio_path), str(output_root), split_name, str(dataset_root)) 
+        for audio_path in audio_files_list
+    ]
+    
+    if not worker_args:
+        print(f"No audio files found for partition '{split_name}'. Skipping.")
+        return
+
+    print(f"Found {len(worker_args)} tasks. Starting parallel processing with {num_workers} workers...")
+    processed_entries, skipped_files = [], []
+
+    with multiprocessing.Pool(processes=num_workers) as pool:
+        with tqdm(total=len(worker_args), desc=f"Preprocessing {split_name}") as pbar:
+            for result in pool.imap_unordered(process_single_file, worker_args):
+                is_success, entry, skipped_msg = result
+                if is_success:
+                    processed_entries.append(entry)
+                elif skipped_msg:
+                    skipped_files.append(skipped_msg)
+                pbar.update(1)
+
+    # Save the JSON in the list-of-lists format required by utils.py
+    with open(output_json_path, "w") as f:
+        json.dump(processed_entries, f, indent=2)
+        
+    print(f"✅ Finished {split_name} partition!")
+    print(f"   - {len(processed_entries)} mel spectrograms saved in: {output_mel_dir}")
+    print(f"   - Metadata saved to: {output_json_path}")
+    if skipped_files:
+        print(f"   - ❗️ Skipped {len(skipped_files)} files due to errors.")
+        
+# --------------------------------------------------------------------------------
+# --- Main function (MODIFIED to pass correct args) ---
+# --------------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(description="Preprocess test audio dataset (new structure) into Mel spectrogram tensors and JSON metadata.")
+    parser.add_argument("--dataset_root", type=str, required=True, help="Path to the root directory containing the 'test/audio' folder.")
+    parser.add_argument("--output_root", type=str, required=True, help="Path to the output directory where processed data will be saved. For 'utils.py' to work, this MUST be the same as --dataset_root.")
+    parser.add_argument("--workers", type=int, default=1, help="Number of parallel worker processes to use. Default is 1.") 
+    args = parser.parse_args()
+    
+    # --- IMPORTANT ---
+    if args.dataset_root != args.output_root:
+        print("="*50)
+        print("WARNING:")
+        print(f"Your --dataset_root is: {args.dataset_root}")
+        print(f"Your --output_root is:   {args.output_root}")
+        print("For the provided 'utils.py' to work correctly, these two paths MUST be the same.")
+        print("The 'utils.py' script expects 'log_specs' to be inside the 'dataset_root'.")
+        print("Proceeding, but training/prediction will fail if paths are different.")
+        print("="*50)
+
+    warnings.filterwarnings("ignore")
+
+    dataset_root, output_root = Path(args.dataset_root), Path(args.output_root)
+    output_root.mkdir(parents=True, exist_ok=True)
+    
+    # 1. Find all audio files in the 'test/audio' directory
+    test_audio_dir = dataset_root / "test" / "audio"
+    if not test_audio_dir.is_dir():
+        print(f"❌ ERROR: Cannot find directory: {test_audio_dir}")
+        print("Please ensure your --dataset_root is correct and contains 'test/audio'")
+        sys.exit(1)
+        
+    print(f"Searching for audio files in: {test_audio_dir}")
+    # Use rglob to find all .wav files recursively
+    test_files = list(test_audio_dir.rglob('*.wav'))
+    print(f"Found {len(test_files)} audio files.")
+    
+    if not test_files:
+        print("❌ ERROR: No .wav files found.")
+        sys.exit(1)
+        
+    # 2. Process the test split
+    process_test_files(test_files, output_root, "test", args.workers, dataset_root)
+    
+    print("\n🎉 All test files processed successfully!")
+
+if __name__ == "__main__":
+    main()
