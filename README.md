@@ -18,12 +18,6 @@ The system jointly processes **raw audio waveforms** and **Mel-spectrograms** to
   - [2. Training](#2-training)
   - [3. Evaluation / Testing](#3-evaluation--testing)
 - [Configuration](#-configuration)
-- [Results](#-results)
-- [Complexity](#-complexity)
-- [Submission Info](#-submission-info)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
 
 ---
 
@@ -83,9 +77,12 @@ EnvDeepFake/
 
 ## ⚙️ InstallationStep 
 
-Step 1: Clone the repositoryBashgit clone [https://github.com/Sarthak-Shaurya/EnvDeepFake.git](https://github.com/Sarthak-Shaurya/EnvDeepFake.git)
-cd EnvDeepFake
+Step 1: Clone the repository
 
+```bash
+git clone [https://github.com/Sarthak-Shaurya/EnvDeepFake.git](https://github.com/Sarthak-Shaurya/EnvDeepFake.git)
+cd EnvDeepFake
+```
 Step 2: Create and activate a virtual environmentBashpython -m venv venv
 
 <b> On Windows </b>
@@ -99,8 +96,9 @@ Step 3: Install dependencies
 
 ```bash
 pip install -r requirements.txt
-💡 Note: Typical requirements include torch, torchaudio, timm, torch_geometric, numpy, librosa, scikit-learn, tqdm, and matplotlib.
 ```
+💡 Note: Typical requirements include torch, torchaudio, timm, torch_geometric, numpy, librosa, scikit-learn, tqdm, and matplotlib.
+
 🧪 Usage
 1. Preprocessing
 Extract waveform and Mel-spectrogram features for all audio files.
@@ -137,9 +135,11 @@ python test.py \
   --checkpoint checkpoints/model_best.pth \
   --test_data path/to/test_data \
   --output results.txt
-Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission file compatible with leaderboard formats.
+
 
 ```
+Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission file compatible with leaderboard formats.
+
 ## Configuration
 
 | **Parameter**     | **Description**             | **Default**      |
