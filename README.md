@@ -111,43 +111,44 @@ python preprocess_env.py \
   --input_dir path/to/raw_audio \
   --output_dir path/to/processed_data \
   --sample_rate 16000
+  ```
 This script will normalize audio, extract Mel-spectrograms, and save tensors for model training.
 
 2. Training
 Train the model using preprocessed features.
 
 Bash
-
+```
 python train.py \
   --data_dir path/to/processed_data \
   --epochs 50 \
   --batch_size 16 \
   --lr 1e-4 \
   --save_dir checkpoints/
+  ```
 During training, the logger saves loss curves and metrics. The best checkpoint (based on validation EER) is saved automatically.
 
 3. Evaluation / Testing
 Evaluate your model on a test set.
 
 Bash
-
+```
 python test.py \
   --checkpoint checkpoints/model_best.pth \
   --test_data path/to/test_data \
   --output results.txt
 Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission file compatible with leaderboard formats.
 
----
 ```
 ## Configuration
 
 | **Parameter**     | **Description**             | **Default**      |
 |--------------------|-----------------------------|------------------|
-| `--epochs`         | Number of training epochs   | 50               |
-| `--batch_size`     | Batch size                  | 16               |
-| `--lr`             | Learning rate               | 1e-4             |
-| `--sample_rate`    | Audio sample rate           | 16000            |
-| `--save_dir`       | Checkpoint save path        | `./checkpoints`  |
+| `epochs`         | Number of training epochs   | 50               |
+| `batch_size`     | Batch size                  | 16               |
+| `lr`             | Learning rate               | 1e-4             |
+| `sample_rate`    | Audio sample rate           | 16000            |
+| `save_dir`       | Checkpoint save path        | `./checkpoints`  |
 
 
 
