@@ -88,10 +88,10 @@ cd EnvDeepFake
 
 Step 2: Create and activate a virtual environmentBashpython -m venv venv
 
-# On Windows
+<b> On Windows </b>
 venv\Scripts\activate
 
-# On macOS/Linux
+<b> On macOS/Linux </b>
 source venv/bin/activate
 
 
