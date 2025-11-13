@@ -67,16 +67,16 @@ EnvDeepFake/
 ```
 
 ## 🧩 System Description
-
-Component,Description
-Sampling Rate,16 kHz
-Input Features,Raw audio waveform + log-Mel spectrogram
-Model,Dual-Stream (Wav2Vec2 + Swin-Tiny + GAT)
-Loss Function,OC-Softmax (margin-based cosine loss)
-Augmentations,"Gaussian noise, time-stretch, pitch-shift, gain variation"
-Metrics,"EER, AUC, Accuracy, Precision, Recall, F1-score"
-GPU Used,NVIDIA RTX A4000 (16 GB VRAM)
-Parameters,~128 Million
+| **Component**      | **Description**                                                                 |
+|---------------------|---------------------------------------------------------------------------------|
+| **Sampling Rate**   | 16 kHz                                                                         |
+| **Input Features**  | Raw audio waveform + log-Mel spectrogram                                       |
+| **Model**           | Dual-Stream (Wav2Vec2 + Swin-Tiny + GAT)                                       |
+| **Loss Function**   | OC-Softmax (margin-based cosine loss)                                          |
+| **Augmentations**   | Gaussian noise, time-stretch, pitch-shift, gain variation                      |
+| **Metrics**         | EER, AUC, Accuracy, Precision, Recall, F1-score                                |
+| **GPU Used**        | NVIDIA RTX A4000 (16 GB VRAM)                                                  |
+| **Parameters**      | ~128 Million                                                                   |
 
 ---
 
@@ -95,32 +95,60 @@ venv\Scripts\activate
 source venv/bin/activate
 
 
-Step 3: Install dependenciesBashpip install -r requirements.txt
-💡 Note: Typical requirements include torch, torchaudio, timm, torch_geometric, numpy, librosa, scikit-learn, tqdm, and matplotlib.🧪 Usage1. PreprocessingExtract waveform and Mel-spectrogram features for all audio files.Bashpython preprocess_env.py \
+Step 3: Install dependencies
+
+```bash
+pip install -r requirements.txt
+💡 Note: Typical requirements include torch, torchaudio, timm, torch_geometric, numpy, librosa, scikit-learn, tqdm, and matplotlib.
+```
+🧪 Usage
+1. Preprocessing
+Extract waveform and Mel-spectrogram features for all audio files.
+
+```bash
+
+python preprocess_env.py \
   --input_dir path/to/raw_audio \
   --output_dir path/to/processed_data \
   --sample_rate 16000
-This script will normalize audio, extract Mel-spectrograms, and save tensors for model training.2. TrainingTrain the model using preprocessed features.Bashpython train.py \
+This script will normalize audio, extract Mel-spectrograms, and save tensors for model training.
+
+2. Training
+Train the model using preprocessed features.
+
+Bash
+
+python train.py \
   --data_dir path/to/processed_data \
   --epochs 50 \
   --batch_size 16 \
   --lr 1e-4 \
   --save_dir checkpoints/
-During training, the logger saves loss curves and metrics. The best checkpoint (based on validation EER) is saved automatically.3. Evaluation / TestingEvaluate your model on a test set.Bashpython test.py \
+During training, the logger saves loss curves and metrics. The best checkpoint (based on validation EER) is saved automatically.
+
+3. Evaluation / Testing
+Evaluate your model on a test set.
+
+Bash
+
+python test.py \
   --checkpoint checkpoints/model_best.pth \
   --test_data path/to/test_data \
   --output results.txt
 Outputs include EER, AUC, accuracy, confusion matrix plots, and a submission file compatible with leaderboard formats.
 
 ---
+```
 ## Configuration
 
-Parameter,Description,Default
---epochs,Number of training epochs,50
---batch_size,Batch size,16
---lr,Learning rate,1e-4
---sample_rate,Audio sample rate,16000
---save_dir,Checkpoint save path,./checkpoints
+| **Parameter**     | **Description**             | **Default**      |
+|--------------------|-----------------------------|------------------|
+| `--epochs`         | Number of training epochs   | 50               |
+| `--batch_size`     | Batch size                  | 16               |
+| `--lr`             | Learning rate               | 1e-4             |
+| `--sample_rate`    | Audio sample rate           | 16000            |
+| `--save_dir`       | Checkpoint save path        | `./checkpoints`  |
+
 
 
 
