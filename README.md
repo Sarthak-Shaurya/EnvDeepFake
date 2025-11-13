@@ -18,7 +18,7 @@ The system jointly processes **raw audio waveforms** and **Mel-spectrograms** to
   - [2. Training](#2-training)
   - [3. Evaluation / Testing](#3-evaluation--testing)
 - [Configuration](#-configuration)
-- [Authors} (#-authors)
+
 
 ---
 
