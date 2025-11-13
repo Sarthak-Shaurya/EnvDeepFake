@@ -50,15 +50,16 @@ This design captures both **fine-grained waveform irregularities** and **spectra
 ```text
 EnvDeepFake/
 │
-├── train.py           # Model training entry point
-├── test.py            # Evaluation / inference script
-├── preprocess_env.py  # Audio preprocessing & feature extraction
-├── model.py           # Dual-stream CNN/Transformer model definition
-├── utils.py           # Utility functions (metrics, loaders, EER computation)
-├── logger.py          # Logging and experiment tracking
-├── submission.txt     # Sample submission file
-├── requirements.txt   # Dependencies (PyTorch, torchaudio, etc.)
-└── README.md          # Project documentation
+├── train.py            # Model training entry point
+├── test.py             # Evaluation / inference script
+├── preprocess_env.py   # Audio preprocessing & feature extraction
+├── predictionScript.py # Runs inference on trained models to generate predictions
+├── model.py            # Dual-stream CNN/Transformer model definition
+├── utils.py            # Utility functions (metrics, loaders, EER computation)
+├── logger.py           # Logging and experiment tracking
+├── submission.txt      # Sample submission file
+├── requirements.txt    # Dependencies (PyTorch, torchaudio, etc.)
+└── README.md           # Project documentation
 ```
 
 ## 🧩 System Description
